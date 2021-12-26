@@ -22,7 +22,7 @@ elif opr_sys == "Windows":
 cwd = os.getcwd()
 current_date_time = datetime.datetime.now()
 MASTER_PASSWORD_FILE_NAME = "master_password.key"
-PASSWORDS_FILE_NAME = "passwords.csv"
+PASSWORDS_FILE_NAME = "passwords.passdata"
 MASTER_PASSWORD = ''
 DECRYPTED_PASSWORDS = ''
 
@@ -44,6 +44,18 @@ def clscr():
         os.system('cls')
     else:
         os.system('clear')
+
+def show_brand():
+    print(Style.RESET_ALL)
+    print(Fore.RED + " _____       "+Fore.BLUE+" _____  __  __ "+Fore.WHITE+"        "+Fore.YELLOW+" ___ "+Fore.GREEN+"  ____       _         "+Fore.YELLOW+" ___ ")
+    print(Fore.RED + "|  __ \      "+Fore.BLUE+"|  __ \|  \/  |"+Fore.WHITE+"        "+Fore.YELLOW+"|  _|"+Fore.GREEN+" |  _ \     | |        "+Fore.YELLOW+"|_  |")
+    print(Fore.RED + "| |__) |   _ "+Fore.BLUE+"| |__) | \  / |"+Fore.WHITE+"  ____  "+Fore.YELLOW+"| |  "+Fore.GREEN+" | |_) | ___| |_ __ _  "+Fore.YELLOW+"  | |")
+    print(Fore.RED + "|  ___/ | | |"+Fore.BLUE+"|  ___/| |\/| |"+Fore.WHITE+" |____| "+Fore.YELLOW+"| |  "+Fore.GREEN+" |  _ < / _ \ __/ _` | "+Fore.YELLOW+"  | |")
+    print(Fore.RED + "| |   | |_| |"+Fore.BLUE+"| |    | |  | |"+Fore.WHITE+"        "+Fore.YELLOW+"| |  "+Fore.GREEN+" | |_) |  __/ || (_| | "+Fore.YELLOW+"  | |")
+    print(Fore.RED + "|_|    \__, |"+Fore.BLUE+"|_|    |_|  |_|"+Fore.WHITE+"        "+Fore.YELLOW+"| |_ "+Fore.GREEN+" |____/ \___|\__\__,_| "+Fore.YELLOW+" _| |")
+    print(Fore.RED + "        __/ |"+Fore.BLUE+"               "+Fore.WHITE+"        "+Fore.YELLOW+"|___|"+Fore.GREEN+"                       "+Fore.YELLOW+"|___|")
+    print(Fore.RED + "       |___/ ")
+    print(Style.RESET_ALL)
 
 # Get the password file
 def get_passwords_file_read():
@@ -96,75 +108,123 @@ def get_master_password_hash():
 
 def validate_master_password(master_password_hash):
     global MASTER_PASSWORD
-    master_password_input = getpass("Enter master password: ")
+    master_password_input = getpass(Fore.BLUE + "Enter master password: " + Style.RESET_ALL)
     master_password_input_hash = hashlib.sha512(master_password_input.encode()).hexdigest()
     MASTER_PASSWORD = master_password_input
     if str(master_password_input_hash) == str(master_password_hash):
         return True
     else:
-        clscr()
-        print(Fore.RED + "Invalid password!" + Style.RESET_ALL)
-        validate_master_password(master_password_hash)
+        return False
 
-def read_passwords(passwords_file_read):
-    # with passwords_file_read as pass_file:
-    #     reader = csv.reader(pass_file, delimiter=' ', quotechar='|')
-    #     passwords_list = []
-    #     for row in reader:
-    #         passwords_list = passwords_list + row
-    #         print(passwords_list)
-    lines = passwords_file_read.readlines()
-    return lines
+def get_passwords_list(passwords_file_read):
+    passwords_list = []
+    with passwords_file_read as file:
+        while (line := file.readline().rstrip()):
+            passwords_list.append(line)
+    line_num = 0
+    for indv_line in passwords_list:
+        passwords_list[line_num] = indv_line.split(",")
+        line_num += 1
 
-read_passwords(open('passwords.csv', 'r'))
-quit()
+    return passwords_list
+
+# DECRYPTED_PASSWORDS = [['https://lynkr.org/', ' lynkr', 'adityad@att.net', ' password!1234', '2001-12-12 12:12:12.123456'], ['https://google.com/', 'google', 'adityad@att.net', ' password!1234', '2001-12-12 12:12:12.123456'], ['https://microsoft.com/', 'microsoft', 'adityad@att.net', ' password!1234', '2001-12-12 12:12:12.123456'], ['https://amazon.com/', 'amazon', 'adityad@att.net', ' password!1234', '2001-12-12 12:12:12.123456'], ['https://ebay.com/', 'ebay', 'adityad@att.net', ' password!1234', '2001-12-12 12:12:12.123456'], ['https://facebook.com/', 'facebook', 'adityad@att.net', ' password!1234', '2001-12-12 12:12:12.123456'], ['https://instagram.com/', 'instagram', 'adityad@att.net', ' password!1234', '2001-12-12 12:12:12.123456'], ['https://twitter.com/', 'twitter', 'adityad@att.net', ' password!1234', '2001-12-12 12:12:12.123456'], ['https://spotify.com/', 'spotify', 'adityad@att.net', ' password!1234', '2001-12-12 12:12:12.123456']]
+
+def search_login(app_name):
+    global DECRYPTED_PASSWORDS
+    search_results = []
+    for indv_login in DECRYPTED_PASSWORDS:
+        if indv_login[1].find(app_name) == -1:
+            continue
+        else:
+            search_results.append(indv_login)
+    return search_results
+
+def save_new_login():
+    pass
 
 def menu():
+    show_brand()
     print(Fore.YELLOW + "Python Password Manager V1.0 [BETA]" + Style.RESET_ALL)
     print()
-    print("1. Search login")
-    print("2. Save new login")
-    print("3. Update a saved password")
-    print("4. View all logins")
-    print("5. Change master password")
-    print("6. Quit")
-    print("7. Destroy all passwords [! CAREFUL WITH THIS !]")
+    print(Fore.YELLOW + "1. " + Style.BRIGHT + "Search login" + Style.RESET_ALL)
+    print(Fore.YELLOW + "2. " + Style.BRIGHT + "Save new login" + Style.RESET_ALL)
+    print(Fore.YELLOW + "3. " + Style.BRIGHT + "Update a saved password" + Style.RESET_ALL)
+    print(Fore.YELLOW + "4. " + Style.BRIGHT + "View all logins" + Style.RESET_ALL)
+    print(Fore.YELLOW + "5. " + Style.BRIGHT + "Change master password" + Style.RESET_ALL)
+    print(Fore.YELLOW + "6. " + Style.BRIGHT + "Quit" + Style.RESET_ALL)
+    print(Fore.YELLOW + "7. " + Style.BRIGHT + "Destroy all passwords [ ! USE WITH CAUTION ! ]" + Style.RESET_ALL)
     print()
-    opt = input("Option: ")
+    opt = input(Fore.YELLOW + "Option: " + Style.BRIGHT)
     if checkIfInt(opt):
         opt = int(opt)
         if opt == 1:
-            pass
+            print()
+            app_name = input(Style.RESET_ALL + Fore.YELLOW + "App/Website name: " + Style.RESET_ALL)
+            search_results = search_login(app_name)
+            if len(search_results) > 0:
+                print()
+                print(Fore.YELLOW + "Search results for \""+Style.RESET_ALL+app_name+Fore.YELLOW+"\":")
+                print(Style.RESET_ALL)
+                search_results = search_results[0]
+                print(Style.BRIGHT + Fore.YELLOW + "Website URL:     " + Style.RESET_ALL + search_results[0])
+                print(Style.BRIGHT + Fore.YELLOW + "Website Name:   " + Style.RESET_ALL + search_results[1])
+                print(Style.BRIGHT + Fore.YELLOW + "Username:        " + Style.RESET_ALL + search_results[2])
+                print(Style.BRIGHT + Fore.YELLOW + "Password:       " + Style.RESET_ALL + search_results[3])
+                print(Style.BRIGHT + Fore.YELLOW + "Saved on:        " + Style.RESET_ALL + search_results[4])
+                print()
+                input(Fore.YELLOW + "Press enter/return to return to the menu.." + Style.RESET_ALL)
+                clscr()
+                menu()
         elif opt == 2:
+            save_new_login()
+        elif opt == 3:
+            pass
+        elif opt == 4:
+            pass
+        elif opt == 5:
+            pass
+        elif opt == 6:
+            clscr()
+            show_brand()
+            print(Fore.GREEN+"Application closed.")
+            print()
+            quit()
+        elif opt == 7:
             pass
         else:
-            pass
+            clscr()
+            print(Fore.RED +"Invalid Option." + Style.RESET_ALL)
+            menu()
     else:
-        pass
+        clscr()
+        print(Fore.RED +"Invalid Option." + Style.RESET_ALL)
+        menu()
 
 def main():
-    # Check the master password
-    master_password_hash = get_master_password_hash()
-    if validate_master_password(master_password_hash):
+    global DECRYPTED_PASSWORDS
+    if validate_master_password(get_master_password_hash()):
+        passwords_file_read = get_passwords_file_read()
+        DECRYPTED_PASSWORDS = get_passwords_list(passwords_file_read)
+        passwords_file_write = get_passwords_file_write()
+        passwords_file_read.close()
+        passwords_file_write.close()
         clscr()
         menu()
     else:
-        print("Invalid master password!")
-        quit()
+        clscr()
+        show_brand()
+        print(Fore.RED + "Invalid master password!" + Style.RESET_ALL)
+        main()
 
-    passwords_file_read = get_passwords_file_read()
-    print(read_passwords(passwords_file_read))
-    passwords_file_write = get_passwords_file_write()
-    passwords = passwords_file_read.read()
+# password@1234
 
-    # passwords_file_write.write(str(test_passwords_data) + "\n")
-
-    print(passwords)
-
-    passwords_file_read.close()
-    passwords_file_write.close()
-
-
-if __name__ == '__main__':
+try:
+    if __name__ == '__main__':
+        clscr()
+        show_brand()
+        main()
+except KeyboardInterrupt:
     clscr()
-    main()
+    print(Fore.RED + "Application forcefully closed!")
+    quit()
